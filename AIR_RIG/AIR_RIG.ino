@@ -76,20 +76,14 @@ int min_position = 2222; ////in [mm/1000] //VALUE WILL BE AUTO CALIBRATED
 int target_force;
 int printcounter;
 int highspeed_valve_position = 128;
-int max_analog_value = 813; //NOT 1024, BECDAUSE CONTROLLINO GOES UP TO 26.4V!
+int max_analog_value = 813; //not 1024, because controllino goes up to 26.4V!
 int measured_values[55];
 int rawdata_lower_sensor;
 int rawdata_upper_sensor;
 int pneumatic_force; //[N]
-int spring_force; //[N]
-//int startposition_spring = 44; //[mm / 10000]* spring_rate;
-//int spring_rate = 0; //[N/mm]
-int kp_max = 1500; //[RPM /(°/10)] USE THIS VALUE TO SCALE THE REGULATOR POTENTIOMETER TO DESIRED RANGE
+int kp_max = 1500; //[RPM /(°/10)] use this value to scale the regulator potentiometer to desired range
 int kp_factor;
 int total_force;
-int PWM_VALVEPOSITION;
-int kp_potvalue;
-int kd_potvalue;
 int pressure_lower_chamber;
 int cycle_end_indicator;
 int cycle_counter;
@@ -111,9 +105,6 @@ float value_linear_pot;
 float force_error;
 float previous_force_error;
 float force_error_speed;
-float P_VALVEPOSITION;
-float D_VALVEPOSITION;
-float PD_VALVEPOSTION;
 float max_position = min_position + 41000; //in [mm/1000] // 41mm = 42Arrays
 float previous_position;
 
@@ -134,7 +125,6 @@ void setup()
   pinMode(highspeed_valve, OUTPUT);
   pinMode(decompression_valve, OUTPUT);
   pinMode(trigger_valve, OUTPUT);
-  //pinMode(locking_valve, OUTPUT);
   pinMode(green_light_pin, OUTPUT);
   pinMode(slow_uplift_valve, OUTPUT);
   pinMode(pressure_sensor_upper_chamber, INPUT);
@@ -178,13 +168,14 @@ void loop()
   }
 
   //***************************************************************************
-  //serial_prints(); //ACTIVATE / DEACTIVATE SERIAL PRINTS FOR MONITORING AND DEBUGGING
+  //ACTIVATE / DEACTIVATE SERIAL PRINTS FOR MONITORING AND DEBUGGING
   //***************************************************************************
+  //serial_prints();
 
   //***************************************************************************
   //MAIN LOOP
   //***************************************************************************
-  toggle_on_off(); //SWITCH MACHINE ON/OFF
+  toggle_on_off(); //switch machine ON/OFF
 
   if (machine_running == false)
   {
@@ -220,7 +211,7 @@ void loop()
   }
 
   //***************************************************************************
-  //Stopwatch two read the length of a programcycle
+  //STOPWATCH TWO READ THE LENGTH OF A PROGRAMCYCLE
   //***************************************************************************
   /*
    long runtime = micros() - runtime_stopwatch;
