@@ -1,4 +1,4 @@
-int get_target_values_n_store_n_print()
+void get_target_values_n_store_n_print()
 {
 
   //*****************************************************************************
@@ -6,47 +6,50 @@ int get_target_values_n_store_n_print()
   //*****************************************************************************
 
   int arraysize = 42;
-  //IDEALISED INSTRON TARGET FORCE VALUES
   //*****************************************************************************
-  //ADAPTED VALUES TO FIT STROKELENGTH //ESCON COMPARISON OPTIMIZED
+  //IDEALIZED INSTRON TARGET FORCE VALUES
+  //ADAPTED VALUES TO FIT STROKELENGTH
+  //ESCON COMPARISON OPTIMIZED
   //*****************************************************************************
-  int target_values[55] = {//not defined arrays will be zero)
-    10, 10, 10, 10, 15, 20,
-    25, 40, 60, 90, 110, 130, 160, 190, 210, 250,
-    260, 260, 260, 270, 280, 300, 330, 370, 440, 520,
-    570, 590, 600, 600, 600, 600, 600, 625, 700, 730,
-    800, 800,
-  };
+  int target_values[55] =
+  {  //not defined arrays will be zero)
+      10, 10, 10, 10, 15, 20, 25, 40, 60, 90, 110, 130, 160, 190, 210, 250, 260,
+          260, 260, 270, 280, 300, 330, 370, 440, 520, 570, 590, 600, 600, 600,
+          600, 600, 625, 700, 730, 800, 800, };
   /*
-    //*****************************************************************************
-    //ORIGINAL VALUES FROM EXCEL BASED ON INSTRON MEASUREMENTS
-    //*****************************************************************************
-     int target_values[55] = {//not defined arrays will be zero
-     //Data from Excel Projekt\Testrig\Worstcase Hüllkurven-xlsx (42 Wertr Hub-mm 0-41)
-     20, 40, 70, 90, 120, 130, 140, 150, 160, 170,
-     185, 200, 220, 235, 250, 260, 260, 260, 260, 260,
-     260, 260, 260, 270, 280, 300, 330, 370, 440, 520,
-     570, 590, 600, 600, 590, 580, 590, 625, 710, 780,
-     840, 880,
-    };
-  */
-  current_array = map(current_position, min_position, max_position, 0, arraysize - 1); //maps the current sledge position to the force arrayvalue
+   * *****************************************************************************
+   * ORIGINAL VALUES FROM EXCEL BASED ON INSTRON MEASUREMENTS
+   * *****************************************************************************
+   * Data from Excel Projekt\Testrig\Worstcase Hüllkurven-xlsx
+   * 42 Werte, Hub-mm 0-41:
+   20,   40,  70,  90, 120, 130, 140, 150, 160, 170,
+   185, 200, 220, 235, 250, 260, 260, 260, 260, 260,
+   260, 260, 260, 270, 280, 300, 330, 370, 440, 520,
+   570, 590, 600, 600, 590, 580, 590, 625, 710, 780,
+   840, 880,
+   */
 
+  current_array = map(current_position, min_position, max_position, 0,
+      arraysize - 1); //maps the current sledge position to the force arrayvalue
+  //*****************************************************************************
   //INTERPOLATION BETWEEN THE FORCE STEPS
   //*****************************************************************************
   //float mm_per_array = (max_position - min_position) / (arraysize - 1);// unit [mm/1000]
-  float mm_per_array = 1000;// unit [mm/1000]
-  interpolation_factor = (current_position - (current_array * mm_per_array)) / mm_per_array; //calculates the relative position in an array
+  float mm_per_array = 1000;  // unit [mm/1000]
+  interpolation_factor = (current_position - (current_array * mm_per_array))
+      / mm_per_array; //calculates the relative position in an array
 
-  target_force = (target_values[current_array + 1] - target_values[current_array]) * interpolation_factor + target_values[current_array];
-
+  target_force = (target_values[current_array + 1]
+      - target_values[current_array]) * interpolation_factor
+      + target_values[current_array];
+  //*****************************************************************************
   //STORE MEASURED FORCE VALUES IN AN ARRAY
   //*****************************************************************************
   measured_values[current_array] = total_force;
 
+  //*****************************************************************************
   //PRINT VALUES
   //*****************************************************************************
-  ///*
 
   int x_axis_1_spiker = 0;
   int x_axis_5_spiker = 0;
@@ -70,7 +73,6 @@ int get_target_values_n_store_n_print()
       spikeheight = 50;
       x_axis_1_spiker = printcounter + 1;
     }
-
 
     if (printcounter == x_axis_5_spiker)
     {
@@ -100,5 +102,4 @@ int get_target_values_n_store_n_print()
     print_a_lot_of_times++;
 
   }
-  //*/
 }

@@ -1,13 +1,14 @@
-int run_startup_procedure()
+void run_startup_procedure()
 {
   Serial.println("RUNNING STARTUP ROUTINE");
   toggle_on_off(); //SWITCH MACHINE ON/OFF
   digitalWrite(pwm_in_valve, LOW); //LOW=INLET CLOSED // HIGH=INLET_OPEN
-  digitalWrite(pwm_out_valve, LOW);//LOW=OUTLET OPEN // HIGH=OUTLET_CLOSED
-  digitalWrite(slow_uplift_valve, LOW);//LOW=INLET CLOSED // HIGH=INLET_OPEN
+  digitalWrite(pwm_out_valve, LOW); //LOW=OUTLET OPEN // HIGH=OUTLET_CLOSED
+  digitalWrite(slow_uplift_valve, LOW); //LOW=INLET CLOSED // HIGH=INLET_OPEN
   delay(1000); //temporary
   Serial.println("RUNNING STARTUP LOOP");
   delay(1000); //temporary
+
   //***************************************************************************
 
   Serial.println("RESET TOOL BY DISCONNECTING POWER SUPPLY");
@@ -18,11 +19,11 @@ int run_startup_procedure()
   //***************************************************************************
 
   Serial.println("WAKE UP TOOL");
-  digitalWrite(trigger_valve, LOW);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, LOW);  //HIGH=pull //LOW=release
   delay(300);
-  digitalWrite(trigger_valve, HIGH);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, HIGH);  //HIGH=pull //LOW=release
   delay(500);
-  digitalWrite(trigger_valve, LOW);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, LOW);  //HIGH=pull //LOW=release
   delay(3000);
   toggle_on_off(); //SWITCH MACHINE ON/OFF
 
@@ -30,9 +31,9 @@ int run_startup_procedure()
 
   Serial.println("SLEDGE CALIBRATION");
 
-  digitalWrite(trigger_valve, HIGH);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, HIGH); //HIGH=pull //LOW=release
   delay(6000);
-  digitalWrite(trigger_valve, LOW);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, LOW); //HIGH=pull //LOW=release
   delay(300);
   toggle_on_off(); //SWITCH MACHINE ON/OFF
 
@@ -47,12 +48,11 @@ int run_startup_procedure()
 
   Serial.println("PUSH DOWN PLATFORM");
 
-  digitalWrite(trigger_valve, HIGH);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, HIGH); //HIGH=pull //LOW=release
   delay(300);
-  digitalWrite(trigger_valve, LOW);//HIGH=pull //LOW=release
+  digitalWrite(trigger_valve, LOW); //HIGH=pull //LOW=release
   delay(1000);
   toggle_on_off(); //SWITCH MACHINE ON/OFF
-
 
   //***************************************************************************
 

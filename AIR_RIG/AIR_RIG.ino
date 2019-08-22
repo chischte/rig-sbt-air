@@ -1,13 +1,13 @@
 /*
-* *****************************************************************************
-* AIR_RIG
-* *****************************************************************************
-* Program to control the JK 1 Million Cycles Test Rig
-* *****************************************************************************
-* Michael Wettstein
-* März 2018, Zürich
-* *****************************************************************************
-*/
+ * *****************************************************************************
+ * AIR_RIG
+ * *****************************************************************************
+ * Program to control the JK 1 Million Cycles Test Rig
+ * *****************************************************************************
+ * Michael Wettstein
+ * März 2018, Zürich
+ * *****************************************************************************
+ */
 
 //*****************************************************************************
 //PRE-SETUP SECTION / PIN LAYOUT
@@ -67,7 +67,7 @@ int current_array;
 //@#§@#§@#§@#§@#§@#§@#§@#
 //@#§@#§@#§@#§@#§@#
 
-int min_position = 2222;////in [mm/1000] //VALUE WILL BE AUTO CALIBRATED
+int min_position = 2222; ////in [mm/1000] //VALUE WILL BE AUTO CALIBRATED
 
 //@#§@#§@#§@#§@#§@#
 //@#§@#§@#§@#§@#§@#§@#§@#
@@ -81,7 +81,7 @@ int measured_values[55];
 int rawdata_lower_sensor;
 int rawdata_upper_sensor;
 int pneumatic_force; //[N]
-int spring_force;//[N]
+int spring_force; //[N]
 //int startposition_spring = 44; //[mm / 10000]* spring_rate;
 //int spring_rate = 0; //[N/mm]
 int kp_max = 1500; //[RPM /(°/10)] USE THIS VALUE TO SCALE THE REGULATOR POTENTIOMETER TO DESIRED RANGE
@@ -107,14 +107,14 @@ float interpolation_factor;
 float exact_position;
 float kd_factor;
 float current_position;
-float value_linear_pot ;
+float value_linear_pot;
 float force_error;
 float previous_force_error;
 float force_error_speed;
 float P_VALVEPOSITION;
 float D_VALVEPOSITION;
 float PD_VALVEPOSTION;
-float max_position = min_position + 41000;//in [mm/1000] // 41mm = 42Arrays
+float max_position = min_position + 41000; //in [mm/1000] // 41mm = 42Arrays
 float previous_position;
 
 //*****************************************************************************
@@ -124,7 +124,8 @@ float previous_position;
 //***********************#**#**********#****#******#*#*************************
 //*****************######***######*****#*****######**#*************************
 //*****************************************************************************
-void setup() {
+void setup()
+{
   //***************************************************************************
   pinMode(stop_button, INPUT);
   pinMode(start_button, INPUT);
@@ -143,7 +144,7 @@ void setup() {
   pinMode(pwm_in_valve, OUTPUT);
   pinMode(stapler_relay, OUTPUT);
   //***************************************************************************
-  Serial.begin(115200);//start serial connection
+  Serial.begin(115200); //start serial connection
   Serial.println("EXIT SETUP");
   digitalWrite(stapler_relay, HIGH);
 }
@@ -156,7 +157,8 @@ void setup() {
 //********************#######***#####***#####***#******************************
 //*****************************************************************************
 //*****************************************************************************
-void loop() {
+void loop()
+{
 
   //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
   //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
@@ -207,7 +209,6 @@ void loop() {
 
     run_main_test_cycle();
 
-
     //***************************************************************************
     //TIMEOUT STOPWATCH - RESET TOOL - AUTO SHUTDOWN
     //***************************************************************************
@@ -222,15 +223,13 @@ void loop() {
   //Stopwatch two read the length of a programcycle
   //***************************************************************************
   /*
-    long runtime = micros() - runtime_stopwatch;
-    Serial.println(runtime);
-    //delay(300);
-    runtime_stopwatch = micros();
-  */
+   long runtime = micros() - runtime_stopwatch;
+   Serial.println(runtime);
+   //delay(300);
+   runtime_stopwatch = micros();
+   */
   //***************************************************************************
 }
-//*****************************************************************************
-//*****************************************************************************
 //*****************************************************************************
 //*****************************************************************************
 //*****************************************************************************

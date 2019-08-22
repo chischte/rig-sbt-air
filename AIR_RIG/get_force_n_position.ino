@@ -1,4 +1,4 @@
-int get_force_n_position()
+void get_force_n_position()
 {
 
   //*****************************************************************************
@@ -6,10 +6,11 @@ int get_force_n_position()
   //read only one pot per cycle (increased cycle speed)
   //*****************************************************************************
 
-  //read position from linearpotentiometer
+  //read position from linear potentiometer
   //*****************************************************************************
   value_linear_pot = analogRead(linear_pot);
-  current_position = (((value_linear_pot - 118) /  (787 - 118) * 42) + 0.5) * 1000; //[mm/1000] MAP FUNCTION (Measured:0mm=787, 42mm=118) //VALUES IN [mm]
+  current_position = (((value_linear_pot - 118) / (787 - 118) * 42) + 0.5)
+      * 1000; //[mm/1000] MAP FUNCTION (Measured:0mm=787, 42mm=118) //VALUES IN [mm]
 
   //read pressure from pressure transmitter
   //*****************************************************************************
@@ -20,10 +21,5 @@ int get_force_n_position()
   //*****************************************************************************
   pneumatic_force = pressure_lower_chamber * 3.117; //[N]//1000 is the conversion from [barg/100] to [N/mm2] //3117 is the area of the Ø63-zylinder
 
-  //calculate spring force
-  //*****************************************************************************
-
-  //calculate total force
-  //*****************************************************************************
-  total_force = pneumatic_force;
+  total_force = pneumatic_force; //no additional spring force
 }
