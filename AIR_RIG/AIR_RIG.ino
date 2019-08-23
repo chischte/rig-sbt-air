@@ -7,106 +7,94 @@
  * Michael Wettstein
  * März 2018, Zürich
  * *****************************************************************************
+ * Rig Settings:
+ * Motor Speed:-10000rpm
+ * Mainpressure: 2.5bar (2.5bar minimum for trigger valve)
+ * Vesselpressure: 2 bar
+ * Open inlet throttle until force starts to overshoot, then turn back a bit.
+ * *****************************************************************************
  */
 
-//*****************************************************************************
-//PRE-SETUP SECTION / PIN LAYOUT
-//*****************************************************************************
-#include <Controllino.h> /* Usage of CONTROLLINO library allows you to use CONTROLLINO_xx aliases in your sketch. */
-//*****************************************************************************
-//KNOBS AND POTENTIOMETERS
-//*****************************************************************************
-#define toggle_knob 4
-#define linear_pot A2
-#define potentiometer A4
-#define start_button A0
-#define stop_button A1
-#define green_light_pin 5
-#define click_relay 22
-//*****************************************************************************
-//SENSORS
-//*****************************************************************************
-#define pressure_sensor_upper_chamber A14
-#define pressure_sensor_lower_chamber A15
-//*****************************************************************************
-//VALVES
-//*****************************************************************************
-#define highspeed_valve 12
-#define decompression_valve 2
-#define trigger_valve 3
-//define locking_valve 4
-#define pwm_out_valve 6 //400 Normliter
-#define pwm_in_valve 4  //200 Normliter
-#define slow_uplift_valve 7 //400 Normliter
-#define stapler_relay 27
-//*****************************************************************************
-//DECLARATION OF VARIABLES / DATA TYPES
-//*****************************************************************************
-//boolean (true/false)
-//byte (0-255)
-//int   (-32,768 to 32,767) / unsigned int: 0 to 65,535
-//long  (-2,147,483,648 to 2,147,483,647)
-//float (6-7 Digits)
-//*****************************************************************************
-boolean machine_running = false;
-boolean printclearance = false;
-boolean step_by_step_mode = false;
-boolean startupmode_active = true;
-boolean valve_curveclearance = true;
-boolean pwm_in_state = 0;
-boolean pwm_out_state = 1;
-boolean highspeed_mode;
+#include <Controllino.h>
 
-byte print_a_lot_of_times;
-byte cycle_state;
-byte knockout_counter;
+//*****************************************************************************
+// DECLARATION OF VARIABLES / DATA TYPES
+//*****************************************************************************
+// boolean (true/false)
+// byte (0-255)
+// int   (-32,768 to 32,767) / unsigned int: 0 to 65,535
+// long  (-2,147,483,648 to 2,147,483,647)
+// float (6-7 Digits)
+//*****************************************************************************
+
+// KNOBS AND POTENTIOMETERS:
+const byte TOGGLE_KNOB = 4;
+const byte LINEAR_POT = A2;
+const byte POTENTIOMETER = A4;
+const byte START_BUTTON = A0;
+const byte STOP_BUTTON = A1;
+const byte GREEN_LIGHT_PIN = 5;
+const byte CLICK_RELAY = 22;
+
+// SENSORS:
+const byte PRESSURE_SENSOR_UPPER_CHAMBER = A14;
+const byte PRESSURE_SENSOR_LOWER_CHAMBER = A15;
+
+// VALVES:
+const byte HIGHSPEED_VALVE = 12;
+const byte DECOMPRESSION_VALVE = 2;
+const byte TRIGGER_VALVE = 3;
+const byte PWM_OUT_VALVE = 6; // 400 Normliter
+const byte PWM_IN_VALVE = 4;  // 200 Normliter
+const byte SLOW_UPLIFT_VALVE = 7; // 400 Normliter
+const byte STAPLER_RELAY = 27;
+
+boolean machineRunning = false;
+boolean printClearance = false;
+boolean stepByStepMode = false;
+boolean startupModeActive = true;
+boolean valveCurveClearance = true;
+boolean pwmInState = 0;
+boolean pwmOutState = 1;
+boolean highspeedMode;
+
+byte printALotOfTimes;
+byte cycleState;
+byte knockoutCounter;
 
 int current_array;
 
-//§#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-//@#§@#§@#§@#§@#§@#§@#§@#
-//@#§@#§@#§@#§@#§@#
-
+//-----------------------------------------------------------------------------
 int min_position = 2222; ////in [mm/1000] //VALUE WILL BE AUTO CALIBRATED
+//-----------------------------------------------------------------------------
 
-//@#§@#§@#§@#§@#§@#
-//@#§@#§@#§@#§@#§@#§@#§@#
-//@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
+int targetForce;
+int printCounter;
+int measuredValue[55];
+int rawDataLowerSensor;
+int rawDataUpperSensor;
+int pneumaticForce; //[N]
+int totalForce;
+int pressureLowerChamber;
+int cycleEndIndicator;
+int cycleCounter;
+const int highspeedValvePostion = 128;
+const int maxAnalogValue = 813; // not 1024, because controllino goes up to 26.4V!
 
-int target_force;
-int printcounter;
-int highspeed_valve_position = 128;
-int max_analog_value = 813; //not 1024, because controllino goes up to 26.4V!
-int measured_values[55];
-int rawdata_lower_sensor;
-int rawdata_upper_sensor;
-int pneumatic_force; //[N]
-int kp_max = 1500; //[RPM /(°/10)] use this value to scale the regulator potentiometer to desired range
-int kp_factor;
-int total_force;
-int pressure_lower_chamber;
-int cycle_end_indicator;
-int cycle_counter;
+unsigned long runtimeStopwatch;
+unsigned long serialPrintTimer;
+unsigned long timeMarkTimer;
+unsigned long pdDeltaT;
+unsigned long newTime;
+unsigned long timeoutStopwatch;
+unsigned long newStartTime;
 
-unsigned long runtime_stopwatch;
-unsigned long serialprinttimer;
-unsigned long previoustime;
-unsigned long timemarktimer;
-unsigned long pd_delta_t;
-unsigned long newtime;
-unsigned long timeout_stopwatch;
-unsigned long new_starttime;
-
-float interpolation_factor;
-float exact_position;
-float kd_factor;
-float current_position;
-float value_linear_pot;
-float force_error;
-float previous_force_error;
-float force_error_speed;
-float max_position = min_position + 41000; //in [mm/1000] // 41mm = 42Arrays
-float previous_position;
+float interpolationFactor;
+float kdFactor;
+float currentPosition;
+float valueLinearPot;
+float max_position = min_position + 41000; // in [mm/1000] // 41mm = 42Arrays
+float previousPosition;
 
 //*****************************************************************************
 //******************######**#######*#######*#******#*######********************
@@ -117,28 +105,26 @@ float previous_position;
 //*****************************************************************************
 void setup()
 {
-  //***************************************************************************
-  pinMode(stop_button, INPUT);
-  pinMode(start_button, INPUT);
-  pinMode(linear_pot, INPUT);
-  pinMode(potentiometer, INPUT);
-  pinMode(highspeed_valve, OUTPUT);
-  pinMode(decompression_valve, OUTPUT);
-  pinMode(trigger_valve, OUTPUT);
-  pinMode(green_light_pin, OUTPUT);
-  pinMode(slow_uplift_valve, OUTPUT);
-  pinMode(pressure_sensor_upper_chamber, INPUT);
-  pinMode(pressure_sensor_lower_chamber, INPUT);
-  pinMode(click_relay, OUTPUT);
-  pinMode(pwm_out_valve, OUTPUT);
-  pinMode(pwm_in_valve, OUTPUT);
-  pinMode(stapler_relay, OUTPUT);
-  //***************************************************************************
+  pinMode(STOP_BUTTON, INPUT);
+  pinMode(START_BUTTON, INPUT);
+  pinMode(LINEAR_POT, INPUT);
+  pinMode(POTENTIOMETER, INPUT);
+  pinMode(HIGHSPEED_VALVE, OUTPUT);
+  pinMode(DECOMPRESSION_VALVE, OUTPUT);
+  pinMode(TRIGGER_VALVE, OUTPUT);
+  pinMode(GREEN_LIGHT_PIN, OUTPUT);
+  pinMode(SLOW_UPLIFT_VALVE, OUTPUT);
+  pinMode(PRESSURE_SENSOR_UPPER_CHAMBER, INPUT);
+  pinMode(PRESSURE_SENSOR_LOWER_CHAMBER, INPUT);
+  pinMode(CLICK_RELAY, OUTPUT);
+  pinMode(PWM_OUT_VALVE, OUTPUT);
+  pinMode(PWM_IN_VALVE, OUTPUT);
+  pinMode(STAPLER_RELAY, OUTPUT);
+
   Serial.begin(115200); //start serial connection
   Serial.println("EXIT SETUP");
-  digitalWrite(stapler_relay, HIGH);
+  digitalWrite(STAPLER_RELAY, HIGH);
 }
-//*****************************************************************************
 //*****************************************************************************
 //********************#*********#####***#####***######*************************
 //********************#********#*****#*#*****#**#*****#************************
@@ -146,38 +132,20 @@ void setup()
 //********************#********#*****#*#*****#**#******************************
 //********************#######***#####***#####***#******************************
 //*****************************************************************************
-//*****************************************************************************
 void loop()
 {
-
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-  //Settings: Motor Speed:-10000rpm
-  //Mainpressure: 2.5bar (2.5bar minimum for trigger valve)
-  //Vesselpressure: 2 bar
-  //open inlet throttle until force starts to overshoot, then turn back a bit
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-  //§#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#§@#
-
-  if (machine_running == false)
+  if (machineRunning == false)
   {
-    get_force_n_position();
-    get_target_values_n_store_n_print();
+    GetForceNPosition();
+    GetTargetValuesNStoreNPrint();
   }
 
   //***************************************************************************
-  //ACTIVATE / DEACTIVATE SERIAL PRINTS FOR MONITORING AND DEBUGGING
+  // MAIN LOOP
   //***************************************************************************
-  //serial_prints();
+  ToggleOnOff(); //switch machine ON/OFF
 
-  //***************************************************************************
-  //MAIN LOOP
-  //***************************************************************************
-  toggle_on_off(); //switch machine ON/OFF
-
-  if (machine_running == false)
+  if (machineRunning == false)
   {
     ///*
     //Serial.print("Move sledge up and set min_position value: ");
@@ -185,42 +153,38 @@ void loop()
     Serial.print(",");
     Serial.print(44000);
     Serial.print(",");
-    Serial.println(current_position, 0);
+    Serial.println(currentPosition, 0);
     delay(20);
     //*/
   }
 
-  if (machine_running == true)
+  if (machineRunning == true)
   {
 
-    if (startupmode_active == true)
+    if (startupModeActive == true)
     {
-      run_startup_procedure();
+      RunStartupProcedure();
     }
 
-    run_main_test_cycle();
+    RunMainTestCylce();
 
     //***************************************************************************
-    //TIMEOUT STOPWATCH - RESET TOOL - AUTO SHUTDOWN
+    // TIMEOUT STOPWATCH - RESET TOOL - AUTO SHUTDOWN
     //***************************************************************************
 
-    if (millis() - timeout_stopwatch > 3500)
+    if (millis() - timeoutStopwatch > 3500)
     {
-      timeout_procedure();
+      TimeoutProcedure();
     }
   }
 
   //***************************************************************************
-  //STOPWATCH TWO READ THE LENGTH OF A PROGRAMCYCLE
+  // STOPWATCH TWO READ THE LENGTH OF A PROGRAMCYCLE
   //***************************************************************************
   /*
-   long runtime = micros() - runtime_stopwatch;
+   long runtime = micros() - runtimeStopwatch;
    Serial.println(runtime);
    //delay(300);
-   runtime_stopwatch = micros();
+   runtimeStopwatch = micros();
    */
-  //***************************************************************************
 }
-//*****************************************************************************
-//*****************************************************************************
-//*****************************************************************************

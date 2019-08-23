@@ -1,15 +1,15 @@
-void get_target_values_n_store_n_print()
+void GetTargetValuesNStoreNPrint()
 {
 
   //*****************************************************************************
-  //CALCULATE DESIRED TARGET FORCE
+  // CALCULATE DESIRED TARGET FORCE
   //*****************************************************************************
 
   int arraysize = 42;
   //*****************************************************************************
-  //IDEALIZED INSTRON TARGET FORCE VALUES
-  //ADAPTED VALUES TO FIT STROKELENGTH
-  //ESCON COMPARISON OPTIMIZED
+  // IDEALIZED INSTRON TARGET FORCE VALUES
+  // ADAPTED VALUES TO FIT STROKELENGTH
+  // ESCON COMPARISON OPTIMIZED
   //*****************************************************************************
   int target_values[55] =
   {  //not defined arrays will be zero)
@@ -29,77 +29,73 @@ void get_target_values_n_store_n_print()
    840, 880,
    */
 
-  current_array = map(current_position, min_position, max_position, 0,
+  current_array = map(currentPosition, min_position, max_position, 0,
       arraysize - 1); //maps the current sledge position to the force arrayvalue
   //*****************************************************************************
-  //INTERPOLATION BETWEEN THE FORCE STEPS
+  // INTERPOLATION BETWEEN THE FORCE STEPS
   //*****************************************************************************
-  //float mm_per_array = (max_position - min_position) / (arraysize - 1);// unit [mm/1000]
+  // float mm_per_array = (max_position - min_position) / (arraysize - 1);// unit [mm/1000]
   float mm_per_array = 1000;  // unit [mm/1000]
-  interpolation_factor = (current_position - (current_array * mm_per_array))
-      / mm_per_array; //calculates the relative position in an array
+  interpolationFactor = (currentPosition - (current_array * mm_per_array))
+      / mm_per_array; // calculates the relative position in an array
 
-  target_force = (target_values[current_array + 1]
-      - target_values[current_array]) * interpolation_factor
+  targetForce = (target_values[current_array + 1]
+      - target_values[current_array]) * interpolationFactor
       + target_values[current_array];
-  //*****************************************************************************
-  //STORE MEASURED FORCE VALUES IN AN ARRAY
-  //*****************************************************************************
-  measured_values[current_array] = total_force;
 
   //*****************************************************************************
-  //PRINT VALUES
+  // STORE MEASURED FORCE VALUES IN AN ARRAY
   //*****************************************************************************
+  measuredValue[current_array] = totalForce;
 
+  //*****************************************************************************
+  // PRINT VALUES
+  //*****************************************************************************
   int x_axis_1_spiker = 0;
   int x_axis_5_spiker = 0;
   int x_axis_10_spiker = 0;
 
-  while (printclearance == true)
+  while (printClearance == true)
   {
-    //Serial.print(0);
-    //Serial.print(",");
-    //Serial.print(+900);
-    //Serial.print(",");
-    Serial.print(target_values[printcounter]);
+    Serial.print(target_values[printCounter]);
     Serial.print(",");
-    Serial.print(measured_values[printcounter]);
+    Serial.print(measuredValue[printCounter]);
     Serial.print(",");
 
     int spikeheight = 0;
 
-    if (printcounter == x_axis_1_spiker)
+    if (printCounter == x_axis_1_spiker)
     {
       spikeheight = 50;
-      x_axis_1_spiker = printcounter + 1;
+      x_axis_1_spiker = printCounter + 1;
     }
 
-    if (printcounter == x_axis_5_spiker)
+    if (printCounter == x_axis_5_spiker)
     {
       spikeheight = 150;
-      x_axis_5_spiker = printcounter + 5;
+      x_axis_5_spiker = printCounter + 5;
     }
-    if (printcounter == x_axis_10_spiker)
+    if (printCounter == x_axis_10_spiker)
     {
       spikeheight = 250;
-      x_axis_10_spiker = printcounter + 10;
+      x_axis_10_spiker = printCounter + 10;
     }
 
     Serial.print(spikeheight);
 
     Serial.println(",");
 
-    if (print_a_lot_of_times == 10)
+    if (printALotOfTimes == 10)
     {
-      printcounter++;
-      if (printcounter == arraysize)
+      printCounter++;
+      if (printCounter == arraysize)
       {
-        printcounter = 0;
-        printclearance = false;
+        printCounter = 0;
+        printClearance = false;
       }
-      print_a_lot_of_times = 0;
+      printALotOfTimes = 0;
     }
-    print_a_lot_of_times++;
+    printALotOfTimes++;
 
   }
 }
